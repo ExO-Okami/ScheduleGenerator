@@ -1,0 +1,15 @@
+{
+  "groups": [
+    { "name": "2МО1", "studentsCount": 25 },
+    { "name": "2МО2", "studentsCount": 28 }
+  ],
+  "teachers": [
+    {
+      "fullName": "Иванов И.И.",
+      "availability": {
+        "1": [1, 2, 3],
+        "2": [2, 3]
+      }
+    }
+  ]
+}

@@ -12,6 +12,9 @@ qt_add_executable(ScheduleGenerator
     mainwindow.h
     mainwindow.ui
     models.h
+    datamanager.h datamanager.cpp
+    test_data.json
+    datamanager.cpp
 )
 
 target_link_libraries(ScheduleGenerator
