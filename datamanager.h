@@ -18,6 +18,13 @@ public:
 
     // API для загрузки данных
     bool loadFromJson(const QString& filePath);
+    // API для экспорта данных
+    bool exportScheduleToCsv(const QString& filePath, const QVector<Lesson>& schedule);
+    // Экспорт расписания в JSON
+    bool exportScheduleToJson(const QString& filePath, const QVector<Lesson>& schedule);
+
+    // Экспорт статистики (пока сделаем каркас)
+    bool exportStatisticsToJson(const QString& filePath);
 
 signals:
     // Сигналы для оповещения интерфейса об ошибках и обновлениях

@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDebug> // Для вывода ошибок в консоль
-
+#include <QTextStream>
 DataManager::DataManager(QObject *parent) : QObject(parent)
 {
 }
@@ -103,4 +103,84 @@ bool DataManager::loadFromJson(const QString& filePath)
     // Оповещаем интерфейс (Александра), что данные успешно загружены
     emit dataUpdated();
     return true;
+    }
+    bool DataManager::exportScheduleToCsv(const QString& filePath, const QVector<Lesson>& schedule)
+    {
+        QFile file(filePath);
+
+        // Открываем файл для записи. Флаг Truncate очистит файл, если он уже существовал
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+            QString errorMsg = "Не удалось создать CSV файл: " + filePath;
+            qWarning() << errorMsg;
+            emit errorOccurred(errorMsg);
+            return false;
+        }
+
+        // Создаем текстовый поток для удобной записи
+        QTextStream out(&file);
+
+        // Excel в русскоязычной локали часто использует точку с запятой (;) как разделитель колонок
+        const QString separator = ";";
+
+        // Записываем заголовки таблицы (первая строка)
+        out << "День" << separator
+            << "Пара" << separator
+            << "Группа" << separator
+            << "Дисциплина" << separator
+            << "Преподаватель" << separator
+            << "Аудитория" << "\n";
+
+        // Проходим по всему сгенерированному расписанию и записываем строки
+        for (const Lesson& lesson : schedule) {
+            out << lesson.slot.day << separator
+                << lesson.slot.pairNumber << separator
+                << lesson.group.name << separator
+                << lesson.subject.name << separator
+                << lesson.teacher.fullName << separator
+                << lesson.room.number << "\n";
+        }
+
+        file.close();
+        return true;
+    }
+    bool DataManager::exportScheduleToJson(const QString& filePath, const QVector<Lesson>& schedule)
+    {
+        QFile file(filePath);
+
+        // Открываем файл для записи
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+            QString errorMsg = "Не удалось создать JSON файл расписания: " + filePath;
+            qWarning() << errorMsg;
+            emit errorOccurred(errorMsg);
+            return false;
+        }
+
+        QJsonArray scheduleArray;
+
+        // Проходим по всему расписанию и упаковываем каждое занятие в JSON-объект
+        for (const Lesson& lesson : schedule) {
+            QJsonObject lessonObj;
+
+            // Заполняем поля объекта
+            lessonObj["day"] = lesson.slot.day;
+            lessonObj["pair"] = lesson.slot.pairNumber;
+            lessonObj["group"] = lesson.group.name;
+            lessonObj["subject"] = lesson.subject.name;
+            lessonObj["teacher"] = lesson.teacher.fullName;
+            lessonObj["room"] = lesson.room.number;
+
+            // Добавляем готовый объект занятия в массив
+            scheduleArray.append(lessonObj);
+        }
+
+        // Создаем корневой объект документа
+        QJsonObject rootObject;
+        rootObject["schedule"] = scheduleArray;
+
+        // Превращаем наши объекты в текстовый JSON-формат и записываем в файл
+        QJsonDocument jsonDoc(rootObject);
+        file.write(jsonDoc.toJson());
+        file.close();
+
+        return true;
 }
