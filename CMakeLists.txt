@@ -1,37 +1,28 @@
-cmake_minimum_required(VERSION 3.19)
-project(ScheduleGenerator LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.14)
+project(TimetableGA LANGUAGES CXX)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
+# Требуем стандарт C++17 (нужен для auto [c1, c2] = crossover(...))
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-qt_standard_project_setup()
-
-qt_add_executable(ScheduleGenerator
-    WIN32 MACOSX_BUNDLE
+# Исполняемый файл из нужных .cpp файлов
+# (заголовки .h подключать НЕ нужно — они подтянутся автоматически через #include)
+add_executable(timetable
     main.cpp
-    mainwindow.cpp
-    mainwindow.h
-    mainwindow.ui
-    models.h
-    datamanager.h datamanager.cpp
-    test_data.json
-    datamanager.cpp
+    fitness.cpp
+    genetic_algorithm.cpp
 )
 
-target_link_libraries(ScheduleGenerator
-    PRIVATE
-        Qt::Core
-        Qt::Widgets
-)
+# Включаем оптимизацию для Release-сборки
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
-install(TARGETS ScheduleGenerator
-    BUNDLE  DESTINATION .
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-
-qt_generate_deploy_app_script(
-    TARGET ScheduleGenerator
-    OUTPUT_SCRIPT deploy_script
-    NO_UNSUPPORTED_PLATFORM_ERROR
-)
-install(SCRIPT ${deploy_script})
+# Флаги компиляции
+if(MSVC)
+    # Для Visual Studio
+    target_compile_options(timetable PRIVATE /W4 /O2)
+else()
+    # Для GCC / Clang
+    target_compile_options(timetable PRIVATE -Wall -Wextra -O2)
+endif()
