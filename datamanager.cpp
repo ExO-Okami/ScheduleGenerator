@@ -12,6 +12,8 @@ DataManager::DataManager(QObject *parent) : QObject(parent)
 // Геттеры для интерфейса
 QVector<Group> DataManager::getGroups() const { return m_groups; }
 QVector<Teacher> DataManager::getTeachers() const { return m_teachers; }
+QVector<Room> DataManager::getRooms() const { return m_rooms; }
+QVector<Subject> DataManager::getSubjects() const { return m_subjects; }
 
 bool DataManager::loadFromJson(const QString& filePath)
 {
@@ -64,6 +66,7 @@ bool DataManager::loadFromJson(const QString& filePath)
         qWarning() << "Поле 'groups' отсутствует или не является массивом!";
     }
 
+
     // TODO: Добавить парсинг преподавателей (m_teachers)
     // --- ПАРСИНГ ПРЕПОДАВАТЕЛЕЙ ---
     if (rootObject.contains("teachers") && rootObject["teachers"].isArray()) {
@@ -103,6 +106,48 @@ bool DataManager::loadFromJson(const QString& filePath)
     // Оповещаем интерфейс (Александра), что данные успешно загружены
     emit dataUpdated();
     return true;
+
+    // --- ПАРСИНГ АУДИТОРИЙ ---
+    if (rootObject.contains("rooms") && rootObject["rooms"].isArray()) {
+        QJsonArray roomsArray = rootObject["rooms"].toArray();
+        for (int i = 0; i < roomsArray.size(); ++i) {
+            QJsonObject roomObj = roomsArray[i].toObject();
+            Room newRoom;
+
+            newRoom.number = roomObj["number"].toString("Неизвестно");
+            newRoom.type = roomObj["type"].toString("Общая");
+            newRoom.capacity = roomObj["capacity"].toInt(0);
+
+            m_rooms.append(newRoom);
+        }
+    } else {
+        qWarning() << "Поле 'rooms' отсутствует или не является массивом!";
+    }
+
+    // --- ПАРСИНГ ДИСЦИПЛИН ---
+    if (rootObject.contains("subjects") && rootObject["subjects"].isArray()) {
+        QJsonArray subjectsArray = rootObject["subjects"].toArray();
+        for (int i = 0; i < subjectsArray.size(); ++i) {
+            QJsonObject subjObj = subjectsArray[i].toObject();
+            Subject newSubject;
+
+            newSubject.name = subjObj["name"].toString("Неизвестная дисциплина");
+            newSubject.type = subjObj["type"].toString("Лекция");
+            newSubject.hours = subjObj["hours"].toInt(0);
+            newSubject.teacherId = subjObj["teacherId"].toString("");
+
+            // Парсим список целевых групп для этой дисциплины (вложенный массив строк)
+            if (subjObj.contains("targetGroups") && subjObj["targetGroups"].isArray()) {
+                QJsonArray groupsArray = subjObj["targetGroups"].toArray();
+                for (int j = 0; j < groupsArray.size(); ++j) {
+                    newSubject.targetGroups.append(groupsArray[j].toString());
+                }
+            }
+            m_subjects.append(newSubject);
+        }
+    } else {
+        qWarning() << "Поле 'subjects' отсутствует или не является массивом!";
+    }
     }
     bool DataManager::exportScheduleToCsv(const QString& filePath, const QVector<Lesson>& schedule)
     {
@@ -183,4 +228,59 @@ bool DataManager::loadFromJson(const QString& filePath)
         file.close();
 
         return true;
+
+        bool DataManager::exportStatisticsToJson(const QString& filePath, const QVector<Lesson>& schedule)
+        {
+            QFile file(filePath);
+
+            // Открываем файл для записи
+            if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+                QString errorMsg = "Не удалось создать JSON файл статистики: " + filePath;
+                qWarning() << errorMsg;
+                emit errorOccurred(errorMsg);
+                return false;
+            }
+
+            // Словари для подсчета нагрузки (ключ - имя/номер, значение - количество пар)
+            QMap<QString, int> teacherLoad;
+            QMap<QString, int> groupLoad;
+            QMap<QString, int> roomLoad;
+
+            // Проходим по всему расписанию и считаем частоту
+            for (const Lesson& lesson : schedule) {
+                teacherLoad[lesson.teacher.fullName]++;
+                groupLoad[lesson.group.name]++;
+                roomLoad[lesson.room.number]++;
+            }
+
+            QJsonObject rootObject;
+
+            // Упаковываем статистику преподавателей
+            QJsonObject teachersObj;
+            for (auto it = teacherLoad.constBegin(); it != teacherLoad.constEnd(); ++it) {
+                teachersObj[it.key()] = it.value();
+            }
+            rootObject["teacherLoad"] = teachersObj;
+
+            // Упаковываем статистику групп
+            QJsonObject groupsObj;
+            for (auto it = groupLoad.constBegin(); it != groupLoad.constEnd(); ++it) {
+                groupsObj[it.key()] = it.value();
+            }
+            rootObject["groupLoad"] = groupsObj;
+
+            // Упаковываем статистику аудиторий
+            QJsonObject roomsObj;
+            for (auto it = roomLoad.constBegin(); it != roomLoad.constEnd(); ++it) {
+                roomsObj[it.key()] = it.value();
+            }
+            rootObject["roomLoad"] = roomsObj;
+
+            // Сохраняем в файл
+            QJsonDocument jsonDoc(rootObject);
+            file.write(jsonDoc.toJson());
+            file.close();
+
+            return true;
+        }
 }

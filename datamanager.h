@@ -24,7 +24,12 @@ public:
     bool exportScheduleToJson(const QString& filePath, const QVector<Lesson>& schedule);
 
     // Экспорт статистики (пока сделаем каркас)
-    bool exportStatisticsToJson(const QString& filePath);
+    bool exportStatisticsToJson(const QString& filePath, const QVector<Lesson>& schedule);
+
+    QVector<Room> getRooms() const;
+    QVector<Subject> getSubjects() const;
+
+
 
 signals:
     // Сигналы для оповещения интерфейса об ошибках и обновлениях
