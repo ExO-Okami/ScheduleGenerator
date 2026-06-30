@@ -68,30 +68,30 @@ void generateTestData(std::vector<Group>& groups,
     for (int g = 0; g < 10; ++g) {
         // Предмет 1: Математика (препод 0, 2)
         add(0, g, ROOM_LECTURE,  1);  // Лекция
-        add(2, g, ROOM_PRACTICE, 1);  // Практика
+        add(2, g, ROOM_PRACTICE, 2);  // Практика
         
         // Предмет 2: Физика (препод 1, 3)
         add(1, g, ROOM_LECTURE,  1);
-        add(3, g, ROOM_PRACTICE, 1);
+        add(3, g, ROOM_PRACTICE, 2);
         
         // Предмет 3: Программирование (препод 4, 5)
         add(4, g, ROOM_LECTURE,  1);
-        add(5, g, ROOM_PRACTICE, 1);
+        add(5, g, ROOM_PRACTICE, 2);
         
         // Предмет 4: Базы данных (препод 6, 7)
         add(6, g, ROOM_LECTURE,  1);
-        add(7, g, ROOM_PRACTICE, 1);
+        add(7, g, ROOM_PRACTICE, 2);
         
         // Предмет 5: Алгоритмы (препод 8, 9)
         add(8, g, ROOM_LECTURE,  1);
-        add(9, g, ROOM_PRACTICE, 1);
+        add(9, g, ROOM_PRACTICE, 2);
         
         // Предмет 6: Сети (препод 10)
         add(10, g, ROOM_LECTURE, 1);
         add(10, g, ROOM_PRACTICE, 1);
         
         // Предмет 7: Физкультура (препод 11, спортзал)
-        add(11, g, ROOM_SPORTS, 1);
+        add(11, g, ROOM_SPORTS, 2);
     }
 }
 
