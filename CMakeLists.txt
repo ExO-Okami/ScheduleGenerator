@@ -1,37 +1,69 @@
-cmake_minimum_required(VERSION 3.19)
-project(ScheduleGenerator LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.16)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
+project(ScheduleGenerator VERSION 0.1 LANGUAGES CXX)
 
-qt_standard_project_setup()
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
-qt_add_executable(ScheduleGenerator
-    WIN32 MACOSX_BUNDLE
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
+
+set(PROJECT_SOURCES
     main.cpp
-    mainwindow.cpp
+
     mainwindow.h
+    mainwindow.cpp
     mainwindow.ui
+
     models.h
-    datamanager.h datamanager.cpp
-    test_data.json
+
+    datamanager.h
     datamanager.cpp
+
+    scheduler.h
+    scheduler.cpp
+
+    scheduleutils.h
+
+    datatab.h
+    datatab.cpp
+
+    generationtab.h
+    generationtab.cpp
+
+    resulttab.h
+    resulttab.cpp
+
+    heatmapwidget.h
+    heatmapwidget.cpp
+
+    barchartwidget.h
+    barchartwidget.cpp
+
+    teacheravailabilitydialog.h
+    teacheravailabilitydialog.cpp
+
+    subjectdialog.h
+    subjectdialog.cpp
 )
 
-target_link_libraries(ScheduleGenerator
-    PRIVATE
-        Qt::Core
-        Qt::Widgets
-)
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    qt_add_executable(ScheduleGenerator
+        MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
+    )
+else()
+    add_executable(ScheduleGenerator
+        ${PROJECT_SOURCES}
+    )
+endif()
 
-install(TARGETS ScheduleGenerator
-    BUNDLE  DESTINATION .
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
+target_link_libraries(ScheduleGenerator PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets)
 
-qt_generate_deploy_app_script(
-    TARGET ScheduleGenerator
-    OUTPUT_SCRIPT deploy_script
-    NO_UNSUPPORTED_PLATFORM_ERROR
-)
-install(SCRIPT ${deploy_script})
+if(${QT_VERSION_MAJOR} EQUAL 6)
+    qt_finalize_executable(ScheduleGenerator)
+endif()
