@@ -27,6 +27,9 @@ set(PROJECT_SOURCES
     scheduler.h
     scheduler.cpp
 
+    genetic_scheduler.h
+    genetic_scheduler.cpp
+
     scheduleutils.h
 
     datatab.h

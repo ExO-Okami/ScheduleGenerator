@@ -24,7 +24,7 @@ private:
     Ui::MainWindow *ui;
 
     DataManager* m_dataManager;
-    IScheduler* m_scheduler; // временно указывает на StubScheduler, см. scheduler.h
+    IScheduler* m_scheduler; // указывает на GeneticScheduler, см. genetic_scheduler.h
 
     DataTab* m_dataTab;
     GenerationTab* m_generationTab;

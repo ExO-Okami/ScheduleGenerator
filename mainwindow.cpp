@@ -4,6 +4,7 @@
 #include "datatab.h"
 #include "generationtab.h"
 #include "resulttab.h"
+#include "genetic_scheduler.h"
 
 #include <QTabWidget>
 
@@ -17,12 +18,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dataManager = new DataManager(this);
 
-    // ВРЕМЕННО: используется StubScheduler (заглушка), пока разработчик
-    // алгоритма не предоставит полноценную реализацию IScheduler.
-    // Когда алгоритм будет готов, достаточно заменить эту строку на
-    // создание реального класса-наследника IScheduler — остальной код
-    // интерфейса менять не требуется.
-    m_scheduler = new StubScheduler();
+    // Основной алгоритм построения расписания — генетический алгоритм
+    // (см. genetic_scheduler.h/.cpp). Реализует интерфейс IScheduler, поэтому
+    // вкладка "Генерация" работает с ним точно так же, как раньше со
+    // StubScheduler — без каких-либо изменений остального кода интерфейса.
+    m_scheduler = new GeneticScheduler();
 
     QTabWidget* tabs = new QTabWidget(this);
     setCentralWidget(tabs);
