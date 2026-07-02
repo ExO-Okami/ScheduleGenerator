@@ -18,10 +18,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_dataManager = new DataManager(this);
 
-    // Основной алгоритм построения расписания — генетический алгоритм
-    // (см. genetic_scheduler.h/.cpp). Реализует интерфейс IScheduler, поэтому
-    // вкладка "Генерация" работает с ним точно так же, как раньше со
-    // StubScheduler — без каких-либо изменений остального кода интерфейса.
     m_scheduler = new GeneticScheduler();
 
     QTabWidget* tabs = new QTabWidget(this);
